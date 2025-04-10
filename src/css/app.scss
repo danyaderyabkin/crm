@@ -1,1 +1,31 @@
 // app global css in SCSS form
+@import "fonts";
+body {
+  font-family: 'Mulish', sans-serif;
+}
+.text-mainAuth {
+  color: #4778EB;
+}
+.bg-mainAuth {
+  background: #4778EB;
+}
+.text-bolded {
+  font-weight: 900 !important;
+}
+.bg-inputAuth {
+  background: #EFF3FA;
+}
+.custom-rounded-input {
+  border-radius: 15px !important;
+
+  .q-field__control {
+    border-radius: 15px !important;
+  }
+  .q-field__label {
+    font-size: 16px !important;
+
+  }
+}
+* {
+  font-family: 'Mulish', sans-serif;
+}

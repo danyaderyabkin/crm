@@ -1,23 +1,23 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+<!--    <q-header elevated>-->
+<!--      <q-toolbar>-->
+<!--        <q-btn-->
+<!--          flat-->
+<!--          dense-->
+<!--          round-->
+<!--          icon="menu"-->
+<!--          aria-label="Menu"-->
+<!--          @click="toggleLeftDrawer"-->
+<!--        />-->
 
-        <q-toolbar-title>
-          WeCRM
-        </q-toolbar-title>
+<!--        <q-toolbar-title>-->
+<!--          WeCRM-->
+<!--        </q-toolbar-title>-->
 
-        <div>v1.0</div>
-      </q-toolbar>
-    </q-header>
+<!--        <div>v1.0</div>-->
+<!--      </q-toolbar>-->
+<!--    </q-header>-->
 
 <!--    <q-drawer-->
 <!--      v-model="leftDrawerOpen"-->
@@ -40,13 +40,18 @@
 <!--    </q-drawer>-->
 
     <q-page-container>
-      <router-view />
+        <router-view />
     </q-page-container>
+    <q-footer class="bg-white text-black">
+      <q-toolbar >
+        <q-toolbar-title class="text-grey-8 text-body1 text-center">Made by Moovix</q-toolbar-title>
+      </q-toolbar>
+    </q-footer>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+// import { ref } from 'vue';
 // import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
 
 // const linksList: EssentialLinkProps[] = [
@@ -94,9 +99,9 @@ import { ref } from 'vue';
 //   }
 // ];
 
-const leftDrawerOpen = ref(false);
-
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+// const leftDrawerOpen = ref(false);
+//
+// function toggleLeftDrawer () {
+//   leftDrawerOpen.value = !leftDrawerOpen.value;
+// }
 </script>

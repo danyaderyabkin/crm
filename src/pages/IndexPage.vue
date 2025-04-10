@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex items-center">
+  <q-page class="flex column justify-center items-center">
     <example-component
       title="Example component"
       active
@@ -7,6 +7,7 @@
       :meta="meta"
     ></example-component>
   </q-page>
+
 </template>
 
 <script setup lang="ts">
