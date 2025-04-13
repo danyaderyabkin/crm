@@ -33,7 +33,7 @@
         v-model="password"
         label="Пароль"
         lazy-rules
-        :rules="[(val) => (val !== null && val !== '') || 'Неверный пароль']"
+        :rules="[(val) => (val !== null && val !== '') || 'Введите пароль']"
       />
 
       <div class="flex justify-center">

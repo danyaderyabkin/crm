@@ -1,7 +1,11 @@
 // app global css in SCSS form
 @import "fonts";
+* {
+  font-family: 'Mulish', sans-serif;
+}
 body {
   font-family: 'Mulish', sans-serif;
+  min-width: 320px;
 }
 .text-mainAuth {
   color: #4778EB;
@@ -26,6 +30,31 @@ body {
 
   }
 }
-* {
-  font-family: 'Mulish', sans-serif;
+
+
+
+
+//tabs
+.tabs--custom {
+  svg {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+//tasks
+
+.task {
+  &__item {
+    background-color: #EFF4FB;
+    border-radius: 15px;
+  }
+  &__small {
+    border-radius: 7px;
+    font-size: 11px;
+  }
+}
+
+.bell {
+  width: 25px;
 }
