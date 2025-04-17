@@ -11,6 +11,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/CabinetLayout.vue'),
     children: [{ path: '', component: () => import('pages/TasksPage.vue') }],
   },
+  {
+    path: '/chat',
+    component: () => import('layouts/CabinetLayout.vue'),
+    children: [{ path: '', component: () => import('pages/ChatPage.vue') }],
+  },
+  {
+    path: '/settings',
+    component: () => import('layouts/CabinetLayout.vue'),
+    children: [{ path: '', component: () => import('pages/SettingsPage.vue') }],
+  },
 
   // Always leave this as last one,
   // but you can also remove it

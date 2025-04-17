@@ -61,6 +61,7 @@ import { useQuasar } from 'quasar'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
+import { LocalStorage } from 'quasar'
 
 interface ApiResponse {
   data: {
@@ -90,6 +91,7 @@ async function loadData() {
     data.value = response.data;
     if (!response.data.error) {
       await router.push('/tasks');
+      LocalStorage.set('hash', response.data.data.hash);
     } else {
       $q.notify({
         color: 'negative',
