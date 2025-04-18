@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import ChatHeader from 'components/ChatHeader.vue'
 </script>
 
 <template>
-  <ChatHeader/>
   <div class="q-pa-md">
     <div v-for="item in 5" :key="item">
       <q-chat-message

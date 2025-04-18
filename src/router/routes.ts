@@ -21,6 +21,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/CabinetLayout.vue'),
     children: [{ path: '', component: () => import('pages/SettingsPage.vue') }],
   },
+  {
+    path: '/create-task',
+    component: () => import('layouts/CabinetLayout.vue'),
+    children: [{ path: '', component: () => import('pages/CreateTask.vue') }],
+  },
+  {
+    path: '/create-project',
+    component: () => import('layouts/CabinetLayout.vue'),
+    children: [{ path: '', component: () => import('pages/CreateProject.vue') }],
+  },
 
   // Always leave this as last one,
   // but you can also remove it

@@ -4,7 +4,6 @@ import { LocalStorage } from 'quasar'
 import { useProjectsStore } from 'stores/projects-store'
 import { onMounted, onUnmounted } from 'vue'
 import { formatDateRange } from '../utils/dateFormatter'
-import TasksHeader from 'components/TasksHeader.vue'
 import type { ITask } from 'src/types/dictionary'
 
 const tasks = ref<ITask[] | null>(null)
@@ -57,7 +56,6 @@ onUnmounted(() => {
 
 <template>
   <q-pull-to-refresh @refresh="refresh">
-    <TasksHeader/>
     <div v-if="store.loading || isRefreshing" class="q-pa-sm q-gutter-sm task">
       <q-card v-for="item in 8" :key="item" class="no-shadow task__item">
         <q-item class="q-py-none">
