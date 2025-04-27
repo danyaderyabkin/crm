@@ -1,15 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { LocalStorage } from 'quasar'
 import { useProjectsStore } from 'stores/projects-store'
 import { onMounted, onUnmounted } from 'vue'
 import { formatDateRange } from '../utils/dateFormatter'
-import type { ITask } from 'src/types/dictionary'
+import type { IProject, ITask, IUser } from 'src/types/dictionary';
 
 const tasks = ref<ITask[] | null>(null)
 const visibleTasksCount = ref(20)
 const store = useProjectsStore()
 const isRefreshing = ref(false)
+const tab = ref(1)
+const tabs = ref()
+const currentUser = ref<IUser | null>(null)
+// Фильтруем задачи по выбранной вкладке
+const filteredTasks = computed<ITask[] | null>(() => {
+  if (!tasks.value) return null
+  if (tab.value === 1) return tasks.value
+
+  // Находим выбранный проект по id вкладки
+  const selectedProject = tabs.value?.find((t:ITask) => t.id === tab.value)
+  if (!selectedProject) return tasks.value
+
+  // Фильтруем задачи по project_id
+  return tasks.value.filter(task => task.project_id === selectedProject.id)
+})
 
 const handleScroll = () => {
   if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
@@ -21,17 +36,33 @@ const loadInitialTasks = async () => {
   if (store.dictionary === null) {
     await store.fetchProjects(LocalStorage.getItem('hash'))
   }
+
   tasks.value = store.dictionary ? store.dictionary.tasks.slice(0, visibleTasksCount.value) : null
-  console.log(store.dictionary)
+  currentUser.value = store.dictionary ? store.dictionary.user : null
+  // Фильтруем проекты по доступу текущего пользователя
+  if (store.dictionary) {
+    tabs.value = store.dictionary.projects.filter((project:IProject) => {
+      // Проверяем есть ли текущий пользователь в списке пользователей проекта
+      return project.users.some(user => user.user_id === currentUser.value?.id)
+    })
+  } else {
+    tabs.value = null
+  }
 }
 
-// Функция обновления данных
 const refresh = async (done: () => void) => {
   isRefreshing.value = true
   try {
     await store.fetchProjects(LocalStorage.getItem('hash'))
     visibleTasksCount.value = 20
     tasks.value = store.dictionary ? store.dictionary.tasks.slice(0, visibleTasksCount.value) : null
+
+    // Обновляем фильтрацию проектов при обновлении
+    if (store.dictionary) {
+      tabs.value = store.dictionary.projects.filter(project => {
+        return project.users.some(user => user.user_id === currentUser.value?.id)
+      })
+    }
   } finally {
     isRefreshing.value = false
     done()
@@ -79,8 +110,29 @@ onUnmounted(() => {
     </div>
 
     <div v-else class="q-pa-sm q-gutter-sm task">
+      <q-tabs
+        v-model="tab"
+        inline-label
+        indicator-color="transparent"
+        active-color="white"
+        no-caps
+        dense
+        active-bg-color="primary"
+        class="bg-transparent text-black sticky"
+      >
+        <q-tab content-class="q-py-none" class="q-btn--rounded q-mr-xs" :name="1" label="Все" />
+        <q-tab
+          v-for="tabItem in tabs"
+          :key="tabItem.id"
+          content-class="q-py-none"
+          class="q-btn--rounded q-mr-xs"
+          :name="tabItem.id"
+          :label="tabItem.project_name"
+        />
+      </q-tabs>
+
       <q-card
-        v-for="item in tasks"
+        v-for="item in filteredTasks"
         :key="item.id"
         class="my-card task__item rounded-borders no-shadow"
       >
@@ -96,7 +148,7 @@ onUnmounted(() => {
             <div class="flex items-center no-wrap text-caption">
               <p class="q-ma-none text-truncate">{{item.author.full_name}}
                 <q-icon class="q-mx-xs" color="grey-9" name="trending_flat" />
-                <span v-for="supplier in item.suppliers" :key="supplier.user_id" class="q-ma-none ">{{supplier.user_id === store.dictionary?.user.id ? store.dictionary?.user.full_name : ''}}</span>
+                <span class="q-ma-none ">{{currentUser?.full_name}}</span>
               </p>
             </div>
             <div class="flex items-center no-wrap text-caption">
@@ -113,10 +165,17 @@ onUnmounted(() => {
           </div>
         </q-card-section>
       </q-card>
+
       <!-- Сообщение о завершении -->
       <div v-if="store.dictionary && visibleTasksCount >= store.dictionary.tasks.length" class="text-center text-caption q-mt-md">
         Все задачи загружены
       </div>
+      <q-page-scroller expand position="top" :scroll-offset="150" :offset="[0, 0]">
+        <div class="col cursor-pointer q-pa-sm bg-primary text-white text-center">
+          Подняться вверх
+          <q-icon name="arrow_upward" />
+        </div>
+      </q-page-scroller>
     </div>
   </q-pull-to-refresh>
 </template>
@@ -130,5 +189,12 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.q-tabs--dense .q-tab {
+  min-height: auto;
+}
+
+.q-tab.self-stretch {
+  align-self: center;
 }
 </style>

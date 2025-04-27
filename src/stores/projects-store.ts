@@ -8,7 +8,6 @@ export const useProjectsStore = defineStore('api', () => {
   const noty = ref<INotifications | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
-
   // Действия
   const fetchProjects = async (hash:string | null) => {
     loading.value = true
