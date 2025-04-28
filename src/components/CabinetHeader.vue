@@ -72,7 +72,7 @@ onMounted( async () => await store.fetchNotifications(LocalStorage.getItem('hash
     <q-toolbar v-else-if="route.fullPath === '/create-project'">
       <div class="flex items-center">
         <router-link to="/tasks" class="text-blue-5 flex items-center">
-          <q-icon style="border-radius: 50%;" name="chevron_left" size='20px' class="bg-blue-8 text-white q-mr-xs" />
+          <q-icon style="border-radius: 50%;" name="chevron_left" size='20px' class=" text-blue-8q-mr-xs" />
           <span >Задачи</span>
         </router-link>
       </div>
@@ -106,10 +106,14 @@ onMounted( async () => await store.fetchNotifications(LocalStorage.getItem('hash
           <q-btn icon="close" flat round dense v-close-popup />
           <q-space />
 
-          <q-btn class="q-pa-none" square flat size="md" no-caps>
-            <q-icon class="q-mr-xs" name="check_circle_outline"></q-icon>
+<!--          <q-btn class="q-pa-none" square flat size="md" no-caps>-->
+<!--            <q-icon class="q-mr-xs" name="check_circle_outline"></q-icon>-->
+<!--            Прочитать все-->
+<!--          </q-btn>-->
+          <a class="read-notify" @click.prevent="console.log('da')" href="#">
+            <q-icon class="q-mr-xs" size="sm" name="check_circle_outline"></q-icon>
             Прочитать все
-          </q-btn>
+          </a>
         </q-card-section>
         <q-list class="rounded-borders q-py-lg">
           <q-item v-for="(noty, i) in notyList?.notifications" :key="i">

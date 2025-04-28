@@ -4,7 +4,7 @@ import { LocalStorage } from 'quasar'
 import { useProjectsStore } from 'stores/projects-store'
 import { onMounted, onUnmounted } from 'vue'
 import { formatDateRange } from '../utils/dateFormatter'
-import type { IProject, ITask, IUser } from 'src/types/dictionary';
+import type {IProject, ISupplier, ITask, IUser} from 'src/types/dictionary';
 
 const tasks = ref<ITask[] | null>(null)
 const visibleTasksCount = ref(20)
@@ -75,6 +75,20 @@ const loadMoreTasks = () => {
   tasks.value = store.dictionary.tasks.slice(0, visibleTasksCount.value)
 }
 
+const getProjectName = (projectId: number): string | null => {
+  if (!store.dictionary?.projects) return null
+  const project = store.dictionary.projects.find(p => p.id === projectId)
+  return project ? project.project_name : null
+}
+const getUsersName = (suppliers: ISupplier[]): string[] | null => {
+  if (!store.dictionary?.users) return null
+  const supplierUserIds = suppliers.map(supplier => supplier.user_id);
+  const matchedUsers = store.dictionary.users.filter(user =>
+    supplierUserIds.includes(user.id)
+  );
+  return matchedUsers.map(user => user.full_name);
+}
+
 onMounted(async () => {
   window.addEventListener('scroll', handleScroll)
   await loadInitialTasks()
@@ -141,14 +155,19 @@ onUnmounted(() => {
           <h3 class="task__title q-my-none">{{ item.task_title }}</h3>
         </q-card-section>
         <q-card-section class="flex justify-start q-pa-xs q-px-md">
-          <small class="bg-white rounded-borders text-black q-px-sm items-center">wecrm</small>
+          <small
+            v-if="getProjectName(item.project_id)"
+            class="bg-white rounded-borders text-black q-px-sm items-center"
+          >
+            {{ getProjectName(item.project_id) }}
+          </small>
         </q-card-section>
-        <q-card-section class="q-pt-none q-pb-xs flex no-wrap justify-between">
-          <div class="task__users">
+        <q-card-section class="q-pt-none q-pb-xs q-pr-sm flex no-wrap justify-between">
+          <div class="task__users max-w-[60%]">
             <div class="flex items-center no-wrap text-caption">
               <p class="q-ma-none text-truncate">{{item.author.full_name}}
-                <q-icon class="q-mx-xs" color="grey-9" name="trending_flat" />
-                <span class="q-ma-none ">{{currentUser?.full_name}}</span>
+                <q-icon class="q-mr-xs" color="grey-9" name="trending_flat" />
+                <small class="text-caption"><span class="q-ma-none task__suppliers" v-for="(supplier, i) in getUsersName(item.suppliers)" :key="i"> {{ supplier }}</span></small>
               </p>
             </div>
             <div class="flex items-center no-wrap text-caption">
@@ -159,9 +178,12 @@ onUnmounted(() => {
             <small v-if="item.status_id === 1" class="task__small text-no-wrap bg-primary no-border rounded-borders text-white text-caption q-px-md block">Новый</small>
             <small v-if="item.status_id === 2" class="task__small text-no-wrap bg-yellow-8 no-border rounded-borders text-white text-caption q-px-md block">В процессе</small>
             <small v-if="item.status_id === 3" class="task__small text-no-wrap bg-green-7 no-border rounded-borders text-white text-caption q-px-md block">Выполнено</small>
-            <small v-if="item.status_id === 4" class="task__small text-no-wrap bg-grey-6 no-border rounded-borders text-white text-caption q-px-md block">Отменен</small>
-            <q-icon size="xs" class="q-ml-sm q-mr-xs" color="grey-9" name="far fa-comment-alt" />
-            <p v-if="item.totalComments" class="text-caption q-ma-none">{{item.totalComments}}</p>
+            <small v-if="item.status_id === 4" class="task__small text-no-wrap bg-red-5 no-border rounded-borders text-white text-caption q-px-md block">Не выполнено</small>
+            <small v-if="item.status_id === 5" class="task__small text-no-wrap bg-grey-6 no-border rounded-borders text-white text-caption q-px-md block">Отменен</small>
+            <div class="flex items-center relative-position">
+              <q-icon size="xs" class="q-ml-xs q-mr-xs" color="grey-9 " name="far fa-comment-alt" />
+              <p v-if="item.totalComments" class="text-caption count-message q-ma-none">{{item.totalComments}}</p>
+            </div>
           </div>
         </q-card-section>
       </q-card>
@@ -185,7 +207,7 @@ onUnmounted(() => {
   border-radius: 10px;
 }
 .text-truncate {
-  max-width: 200px;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

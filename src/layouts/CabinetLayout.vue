@@ -27,12 +27,10 @@ const route = useRoute()
 }
 
 .slide-enter-from {
-  transform: translateX(150px);
   opacity: 0;
 }
 
 .slide-leave-to {
-  transform: translateX(-150px);
   opacity: 0;
 }
 .page-container {

@@ -41,6 +41,7 @@
           class="q-px-lg text-subtitle1"
           no-caps
           rounded
+          unelevated
           label="Войти"
           type="submit"
           color="mainAuth"
@@ -62,15 +63,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
 import { LocalStorage } from 'quasar'
+import type {ApiResponse} from 'src/types/api'
 
-interface ApiResponse {
-  data: {
-    hash: string
-    userId: number
-  }
-  messages: string[] | []
-  error: boolean
-}
 
 const $q = useQuasar()
 const router = useRouter()

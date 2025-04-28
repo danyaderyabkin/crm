@@ -67,8 +67,14 @@ a {
     font-weight: 300;
   }
   &__users {
+    max-width: calc(100% - 140px);
     p {
       white-space: nowrap;
+    }
+  }
+  &__suppliers {
+    &:not(:first-child)::before {
+      content: ", ";
     }
   }
 }
@@ -79,6 +85,32 @@ a {
   &.active {
     color: #2675EA;
   }
+}
+
+.read-notify {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  color: #7c7c7c;
+  font-weight: 500;
+  transition: color .1s;
+  i {
+    color: #7c7c7c;
+  }
+  &:active {
+    color: $dark;
+    i {
+      color: $dark;
+    }
+  }
+}
+
+.count-message {
+  position: absolute;
+  right: 50%;
+  top: 50%;
+  transform: translateX(50%) translateY(-58%);
+  font-size: 9px;
 }
 
 .noty {

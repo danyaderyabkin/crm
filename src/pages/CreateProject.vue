@@ -1,15 +1,29 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { useProjectsStore } from 'stores/projects-store';
-import { LocalStorage } from 'quasar';
+import {LocalStorage, useQuasar} from 'quasar';
+import {api} from "boot/axios";
+import type {ApiResponse} from 'src/types/api'
+import type {IUser} from "src/types/dictionary";
+
+
 const text = ref('')
 const textTime = ref('Бессрочный проект')
 const dateFrom = ref('')
 const dateTo = ref('')
-// const file = ref(null)
-const users = ref(null)
+const dateSendTo = ref('')
+const timeTo = ref('')
+const users = ref<IUser[] | null>(null)
 const valueTime = ref<boolean>(true)
+const loading = ref<boolean>(false)
+
 const store = useProjectsStore()
+
+
+const data = ref<ApiResponse | null>(null)
+
+const $q = useQuasar()
+
 const getCurrentDate = () => {
   const today = new Date();
   const day = String(today.getDate()).padStart(2, '0');
@@ -20,6 +34,8 @@ const getCurrentDate = () => {
   const minutes = String(today.getMinutes()).padStart(2, '0');
 
   dateTo.value = `${day}.${month}.${year} ${hours}:${minutes}`;
+  dateSendTo.value = `${day}.${month}.${year}`;
+  timeTo.value = `${hours}:${minutes}`;
 };
 
 const loadInitialTasks = async () => {
@@ -27,6 +43,66 @@ const loadInitialTasks = async () => {
     await store.fetchProjects(LocalStorage.getItem('hash'))
   }
 }
+
+
+
+async function createRroject() {
+  loading.value = true;
+  try {
+
+
+    const params = [
+      `hash=${encodeURIComponent(LocalStorage.getItem('hash') as string)}`,
+      `project_name=${encodeURIComponent(text.value)}`,
+      `date_start=${encodeURIComponent(dateSendTo.value)}`,
+      `time_start=${encodeURIComponent(timeTo.value)}`,
+      `date_finish=${encodeURIComponent(dateFrom.value)}`,
+      `time_finish=${encodeURIComponent(dateFrom.value)}`,
+      ...(users.value?.map(user => `selectedUsers[]=${encodeURIComponent(user.id)}`) || []),
+    ].join('&');
+
+    // Добавляем каждого пользователя отдельно
+
+
+
+    const response = await api.post<ApiResponse>(`/project/create`, params);
+
+    data.value = response.data;
+    if (!response.data.error) {
+      $q.notify({
+        color: 'green-5',
+        position: 'top',
+        message: 'Проект создан!',
+        icon: 'report_problem',
+        timeout: 3000
+      });
+    } else {
+      response.data.messages.forEach((msg: string) => {
+        $q.notify({
+          color: 'negative',
+          position: 'top',
+          message: msg,
+          icon: 'report_problem',
+          timeout: 3000
+        });
+      })
+    }
+
+  } catch (error: unknown) {
+    console.error('Полная информация об ошибке:', error);
+    const errorMessage = 'Ошибка';
+    $q.notify({
+      color: 'negative',
+      position: 'top',
+      message: errorMessage,
+      icon: 'report_problem',
+      timeout: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
 
 onMounted(async () => {
   await loadInitialTasks()
@@ -103,7 +179,6 @@ watch(() => dateFrom.value,() => {
               </q-popup-proxy>
             </q-icon>
           </template>
-
           <template v-slot:append>
             <q-icon name="access_time" class="cursor-pointer text-grey-10 q-pr-md">
               <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -131,7 +206,7 @@ watch(() => dateFrom.value,() => {
           </template>
         </q-select>
       </div>
-
+      <q-btn unelevated @click.prevent="createRroject">Сохранить</q-btn>
     </div>
   </div>
 </template>
@@ -144,14 +219,17 @@ watch(() => dateFrom.value,() => {
   height: .4em;
 }
 .q-toggle__thumb {
-  top: 0.35em;
+  top: 0.345em;
   width: 0.35em;
   height: 0.35em;
   color: white;
-  left: 0.35em;
+  left: 0.34em;
 }
 .q-toggle__inner--truthy .q-toggle__track {
   opacity: 1;
   background: #17de00;
+}
+.q-field .ellipsis {
+  white-space: normal !important;
 }
 </style>

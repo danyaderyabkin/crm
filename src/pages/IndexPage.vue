@@ -14,6 +14,13 @@
 import { ref } from 'vue';
 import type { Todo, Meta } from 'components/models';
 import ExampleComponent from 'components/ExampleComponent.vue';
+import {useRouter} from "vue-router";
+import {LocalStorage} from "quasar";
+
+const router = useRouter()
+if (LocalStorage.getItem('hash')) {
+  await router.push('/tasks')
+}
 
 const todos = ref<Todo[]>([
   {
