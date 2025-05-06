@@ -31,5 +31,15 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
+  Router.beforeEach((to, from, next) => {
+    const isLoggedIn = localStorage.getItem('hash'); // Проверяем наличие hash
+
+    if (to.path === '/' && isLoggedIn) {
+      next('/tasks'); // Перенаправляем на TasksPage если есть hash
+    } else {
+      next(); // Иначе продолжаем как обычно
+    }
+  });
+
   return Router;
 });

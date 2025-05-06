@@ -91,11 +91,11 @@ a {
   font-size: 16px;
   display: flex;
   align-items: center;
-  color: #7c7c7c;
+  color: #353535;
   font-weight: 500;
   transition: color .1s;
   i {
-    color: #7c7c7c;
+    color: #494949;
   }
   &:active {
     color: $dark;
@@ -140,4 +140,11 @@ a {
       font-size: 9px;
     }
   }
+}
+
+.text-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
 }

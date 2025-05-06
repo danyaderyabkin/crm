@@ -84,8 +84,8 @@ async function loadData() {
 
     data.value = response.data;
     if (!response.data.error) {
-      await router.push('/tasks');
       LocalStorage.set('hash', response.data.data.hash);
+      await router.push('/tasks');
     } else {
       $q.notify({
         color: 'negative',

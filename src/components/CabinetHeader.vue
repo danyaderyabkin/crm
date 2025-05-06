@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
 const route = useRoute()
-import { LocalStorage } from 'quasar'
+import {LocalStorage, useQuasar} from 'quasar'
 import { useProjectsStore } from 'stores/projects-store'
-import {onMounted, ref} from "vue";
-// import type { INotifications } from 'src/types/dictionary';
+import {onMounted, ref, watch} from "vue";
 const store = useProjectsStore()
 
+const $q = useQuasar()
 const noty = ref(false)
 const notyList = ref()
 const getNoty = async () => {
@@ -15,7 +15,25 @@ const getNoty = async () => {
   notyList.value = store.noty
 }
 
+const readNotify = async () => {
+  await store.fetchNotificationsAsRead(LocalStorage.getItem('hash'))
+  await getNoty()
+  $q.notify({
+    color: 'primary',
+    position: 'top',
+    message: 'Уведомления прочитаны',
+    icon: 'thumb_up',
+    timeout: 1000
+  });
+}
+
 onMounted( async () => await store.fetchNotifications(LocalStorage.getItem('hash')))
+watch(() => store.refreshTasks, async () => {
+  if (store.refreshTasks) {
+    await store.fetchNotifications(LocalStorage.getItem('hash'))
+    store.refreshTasksSubmit()
+  }
+})
 </script>
 
 <template>
@@ -56,7 +74,7 @@ onMounted( async () => await store.fetchNotifications(LocalStorage.getItem('hash
     <q-toolbar v-else-if="route.fullPath === '/create-task'">
       <div class="flex items-center">
         <router-link to="/tasks" class="text-blue-5 flex items-center">
-          <q-icon style="border-radius: 50%;" name="chevron_left" size='20px' class="bg-blue-8 text-white q-mr-xs" />
+          <q-icon style="border-radius: 50%;" name="chevron_left" size='20px' class="text-blue-8 q-mr-xs" />
           <span >Задачи</span>
         </router-link>
       </div>
@@ -64,7 +82,7 @@ onMounted( async () => await store.fetchNotifications(LocalStorage.getItem('hash
         Создать задачу
       </q-toolbar-title>
       <div class="flex items-center">
-        <q-btn color="blue" flat no-caps class="text-subtitle2 q-pa-none q-mt-xs">
+        <q-btn :disable="store.createTask" @click.prevent="store.createTaskSubmit()" color="blue" flat no-caps class="text-subtitle2 q-pa-none q-mt-xs">
           Сохранить
         </q-btn>
       </div>
@@ -80,7 +98,7 @@ onMounted( async () => await store.fetchNotifications(LocalStorage.getItem('hash
         Создать проект
       </q-toolbar-title>
       <div class="flex items-center">
-        <q-btn color="blue" flat no-caps class="text-subtitle2 q-pa-none q-mt-xs">
+        <q-btn :disable="store.createProject" @click.prevent="store.createProjectSubmit()" color="blue" flat no-caps class="text-subtitle2 q-pa-none q-mt-xs">
           Сохранить
         </q-btn>
       </div>
@@ -97,8 +115,24 @@ onMounted( async () => await store.fetchNotifications(LocalStorage.getItem('hash
       </q-toolbar>
     <q-toolbar v-else-if="route.fullPath === '/settings'">
         <q-toolbar-title class="text-center text-h6 absolute-center">
-          Настройки
+          Профиль
         </q-toolbar-title>
+    </q-toolbar>
+    <q-toolbar v-else-if="route.fullPath.includes('edit-task')">
+      <div class="flex items-center">
+        <q-btn to="/tasks" flat no-caps class="text-blue-5 q-pa-none">
+          <q-icon style="border-radius: 50%;" name="chevron_left" size='20px' class="text-blue-8 q-mr-xs" />
+          <span >Задачи</span>
+        </q-btn>
+      </div>
+      <q-toolbar-title class="text-center text-h6 q-px-none">
+        Изменить задачу
+      </q-toolbar-title>
+      <div class="flex items-center">
+        <q-btn color="blue" flat no-caps class="text-subtitle2 q-pa-none q-mt-xs">
+          Сохранить
+        </q-btn>
+      </div>
     </q-toolbar>
     <q-dialog full-height full-width square maximized v-model="noty">
       <q-card>
@@ -106,14 +140,14 @@ onMounted( async () => await store.fetchNotifications(LocalStorage.getItem('hash
           <q-btn icon="close" flat round dense v-close-popup />
           <q-space />
 
-<!--          <q-btn class="q-pa-none" square flat size="md" no-caps>-->
-<!--            <q-icon class="q-mr-xs" name="check_circle_outline"></q-icon>-->
-<!--            Прочитать все-->
-<!--          </q-btn>-->
-          <a class="read-notify" @click.prevent="console.log('da')" href="#">
-            <q-icon class="q-mr-xs" size="sm" name="check_circle_outline"></q-icon>
+          <q-btn @click.prevent="readNotify" class="q-pa-none" square flat size="md" no-caps>
+            <q-icon class="q-mr-xs" name="check_circle_outline"></q-icon>
             Прочитать все
-          </a>
+          </q-btn>
+<!--          <a class="read-notify" @click="readNotify" href="#">-->
+<!--            <q-icon class="q-mr-xs" size="sm" name="check_circle_outline"></q-icon>-->
+<!--            Прочитать все-->
+<!--          </a>-->
         </q-card-section>
         <q-list class="rounded-borders q-py-lg">
           <q-item v-for="(noty, i) in notyList?.notifications" :key="i">

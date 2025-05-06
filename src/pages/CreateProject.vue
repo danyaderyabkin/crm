@@ -5,22 +5,22 @@ import {LocalStorage, useQuasar} from 'quasar';
 import {api} from "boot/axios";
 import type {ApiResponse} from 'src/types/api'
 import type {IUser} from "src/types/dictionary";
+import {useRouter} from "vue-router";
 
 
-const text = ref('')
-const textTime = ref('Бессрочный проект')
-const dateFrom = ref('')
-const dateTo = ref('')
-const dateSendTo = ref('')
-const timeTo = ref('')
+const text = ref<string>('')
+const textTime = ref<string>('Бессрочный проект')
+const dateFrom = ref<string>('')
+const dateTo = ref<string>('')
+const dateSendTo = ref<string>('')
+const timeTo = ref<string>('')
 const users = ref<IUser[] | null>(null)
 const valueTime = ref<boolean>(true)
 const loading = ref<boolean>(false)
 
 const store = useProjectsStore()
-
-
-const data = ref<ApiResponse | null>(null)
+const router = useRouter()
+// const data = ref<ApiResponse | null>(null)
 
 const $q = useQuasar()
 
@@ -45,64 +45,38 @@ const loadInitialTasks = async () => {
 }
 
 
-
-async function createRroject() {
+async function createProject() {
   loading.value = true;
   try {
-
-
-    const params = [
-      `hash=${encodeURIComponent(LocalStorage.getItem('hash') as string)}`,
-      `project_name=${encodeURIComponent(text.value)}`,
-      `date_start=${encodeURIComponent(dateSendTo.value)}`,
-      `time_start=${encodeURIComponent(timeTo.value)}`,
-      `date_finish=${encodeURIComponent(dateFrom.value)}`,
-      `time_finish=${encodeURIComponent(dateFrom.value)}`,
-      ...(users.value?.map(user => `selectedUsers[]=${encodeURIComponent(user.id)}`) || []),
-    ].join('&');
-
-    // Добавляем каждого пользователя отдельно
-
-
-
-    const response = await api.post<ApiResponse>(`/project/create`, params);
-
-    data.value = response.data;
-    if (!response.data.error) {
-      $q.notify({
-        color: 'green-5',
-        position: 'top',
-        message: 'Проект создан!',
-        icon: 'report_problem',
-        timeout: 3000
-      });
-    } else {
-      response.data.messages.forEach((msg: string) => {
-        $q.notify({
-          color: 'negative',
-          position: 'top',
-          message: msg,
-          icon: 'report_problem',
-          timeout: 3000
-        });
-      })
-    }
-
-  } catch (error: unknown) {
-    console.error('Полная информация об ошибке:', error);
-    const errorMessage = 'Ошибка';
-    $q.notify({
-      color: 'negative',
-      position: 'top',
-      message: errorMessage,
-      icon: 'report_problem',
-      timeout: 3000
+    const [date, time] = dateFrom.value.split(' ');
+    const params = new URLSearchParams({
+      hash: LocalStorage.getItem('hash') as string,
+      project_name: text.value,
+      date_start: dateSendTo.value,
+      time_start: timeTo.value,
+      date_finish: date || '',
+      time_finish: time || '',
     });
+
+    users.value?.forEach(user => params.append('selectedUsers[]', user.id.toString()));
+
+    const { data } = await api.post<ApiResponse>('/project/create', params.toString());
+
+    if (!data.error) {
+      await store.fetchProjects(LocalStorage.getItem('hash'));
+      $q.notify({ color: 'primary', message: 'Проект создан!', icon: 'thumb_up', timeout: 3000 });
+      await router.push('/tasks');
+    } else {
+      data.messages.forEach(msg => $q.notify({ color: 'negative', message: msg, icon: 'report_problem' }));
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    $q.notify({ color: 'negative', message: 'Ошибка создания проекта', icon: 'report_problem' });
   } finally {
     loading.value = false;
+    store.createProjectSubmit();
   }
 }
-
 
 onMounted(async () => {
   await loadInitialTasks()
@@ -112,6 +86,12 @@ onMounted(async () => {
 
 watch(() => dateFrom.value,() => {
   valueTime.value = false
+})
+
+watch(() => store.createProject,async () => {
+  if (store.createProject) {
+    await createProject();
+  }
 })
 
 </script>
@@ -206,7 +186,6 @@ watch(() => dateFrom.value,() => {
           </template>
         </q-select>
       </div>
-      <q-btn unelevated @click.prevent="createRroject">Сохранить</q-btn>
     </div>
   </div>
 </template>

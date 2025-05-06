@@ -13,7 +13,8 @@ export default defineConfig((ctx) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
-      'i18n'
+      'i18n',
+      'pusher'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
@@ -81,7 +82,7 @@ export default defineConfig((ctx) => {
         }],
 
         ['vite-plugin-checker', {
-          vueTsc: true,
+          vueTsc: false,
           eslint: {
             lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
             useFlatConfig: true

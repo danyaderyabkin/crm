@@ -12,6 +12,12 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/TasksPage.vue') }],
   },
   {
+    path: '/chat/:dialog_id',
+    component: () => import('layouts/ChatLayout.vue'),
+    props: true,
+    children: [{ path: '', component: () => import('pages/ChatPageId.vue') }],
+  },
+  {
     path: '/chat',
     component: () => import('layouts/CabinetLayout.vue'),
     children: [{ path: '', component: () => import('pages/ChatPage.vue') }],
@@ -25,6 +31,11 @@ const routes: RouteRecordRaw[] = [
     path: '/create-task',
     component: () => import('layouts/CabinetLayout.vue'),
     children: [{ path: '', component: () => import('pages/CreateTask.vue') }],
+  },
+  {
+    path: '/edit-task/:task_id',
+    component: () => import('layouts/CabinetLayout.vue'),
+    children: [{ path: '', component: () => import('pages/EditTask.vue') }],
   },
   {
     path: '/create-project',

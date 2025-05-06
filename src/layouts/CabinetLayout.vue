@@ -33,10 +33,7 @@ const route = useRoute()
 .slide-leave-to {
   opacity: 0;
 }
-.page-container {
-  padding-top: 60px; /* Высота заголовка */
-  position: relative;
-}
+
 .bg-purple-custom {
   background-color: #F2F2F7;
 }

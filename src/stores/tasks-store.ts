@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { api } from 'boot/axios'
 import { ref } from 'vue'
 
-export const useTasksStore = defineStore('api', () => {
+export const useTasksStore = defineStore('apiTasks', () => {
 
   // Состояние
   const tasks = ref([])
@@ -28,6 +28,17 @@ export const useTasksStore = defineStore('api', () => {
     }
   }
 
+  const deleteTask = async (hash:string | null, id: number) => {
+    try {
+      const response = await api.post('/task/delete?hash=' + hash, {
+        task_id: id,
+      })
+      console.log(response.data.data)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Неизвестная ошибка'
+    }
+  }
+
 
   // Геттеры
 
@@ -36,5 +47,6 @@ export const useTasksStore = defineStore('api', () => {
     loading,
     error,
     fetchTasks,
+    deleteTask
   }
 })
