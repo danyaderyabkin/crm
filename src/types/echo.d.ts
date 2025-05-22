@@ -1,24 +1,29 @@
-import  type { Echo } from 'laravel-echo'
+import type { Echo } from 'laravel-echo'
 
-declare module 'laravel-echo' {
-  interface Echo {
-    connect(): void
-    channel(channel: string): Channel
-    private(channel: string): Channel
-    listen(event: string, callback: (data: never) => void): void
-  }
-
-  interface Channel {
-    listen(event: string, callback: (data: never) => void): Channel
-    notification(callback: (data: never) => void): Channel
-    stopListening(event: string): Channel
-    subscribed(callback: () => void): Channel
-    error(callback: (error: never) => void): Channel
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $echo: Echo
   }
 }
 
 declare global {
   interface Window {
-    Echo: Echo
+    Pusher: never
+  }
+}
+
+export interface PusherMessageEvent<T = never> {
+  event: string
+  data: T
+  channel: string
+}
+
+export interface PrivateMessageData {
+  userId: number
+  data: {
+    message: string
+    senderId: number
+    timestamp: string
+    // Другие поля в зависимости от вашего API
   }
 }

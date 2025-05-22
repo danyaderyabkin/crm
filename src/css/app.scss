@@ -148,3 +148,16 @@ a {
   left: 0;
   width: 100%;
 }
+
+.q-tab__content {
+  width: 100%;
+}
+
+.q-badge {
+  min-width: 16px;
+  min-height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}

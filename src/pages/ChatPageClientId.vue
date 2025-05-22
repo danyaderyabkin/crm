@@ -22,7 +22,6 @@ interface Message {
 }
 
 const currentUserId = ref<number | null>(null)
-const currentUserTo = ref<number | null>(null)
 const messagesContainer = ref<HTMLElement | null>(null)
 const store = useProjectsStore()
 const route = useRoute()
@@ -42,15 +41,8 @@ const fetchMessages = async () => {
     if (!hash) throw new Error('Hash not found in LocalStorage')
 
     const response = await api.get('/chat/messages', {
-      params: { hash, chat_id: dialogId, chat_type: 4 },
+      params: { hash, chat_id: dialogId, chat_type: 2 },
     })
-
-      if (response.data.data[0].from_user_id === currentUserId.value) {
-        currentUserTo.value = response.data.data[0].to_user_id
-      } else {
-        currentUserTo.value = response.data.data[0].from_user_id
-      }
-    console.log(currentUserTo.value)
 
     messages.value = response.data.data || []
   } catch (err) {
@@ -71,7 +63,7 @@ const sendMessage = async () => {
     const tempMessage: Message = {
       id: Date.now(), // Временный ID (заменится при получении от сервера)
       from_user_id: currentUserId.value!,
-      to_user_id: currentUserTo.value!, // ID получателя
+      to_user_id: 177, // ID получателя
       message: newMessage.value,
       attachment: null,
       created_at: `${new Date().getHours()}:${new Date().getMinutes()}`,
@@ -82,10 +74,11 @@ const sendMessage = async () => {
     const formData = new FormData()
     const chatId: string = String(route.params.chat_id)
 
+
     formData.append('hash', LocalStorage.getItem('hash') as string)
     formData.append('chat_id', chatId)
-    formData.append('chat_type', '4')
-    formData.append('to_user_id', String(currentUserTo.value))
+    formData.append('chat_type', '2')
+    formData.append('to_user_id', '177')
     formData.append('message', newMessage.value)
 
     await api.post('/chat/send', formData, {
@@ -208,6 +201,7 @@ onBeforeUnmount(() => {
   <q-inner-loading :showing="loadingMessages">
     <q-spinner-gears size="50px" color="primary" />
   </q-inner-loading>
+
 
   <div v-if="error" class="text-negative q-mb-md">
     {{ error }}

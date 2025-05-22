@@ -2,48 +2,60 @@ export const formatDate = (inputDate?: string): string => {
   if (!inputDate) return '';
 
   try {
-    const [datePart] = inputDate.split(' ');
-    if (!datePart) return inputDate; // Если не удалось извлечь часть с датой
+    const [datePart, timePart] = inputDate.split(' ');
+    if (!datePart || !timePart) return inputDate;
 
-    const dateComponents: string[]  = datePart.split('.');
-    if (dateComponents.length !== 3) return inputDate; // Неправильный формат даты
+    let day: number, month: number, year: number;
 
-    const day = parseInt(dateComponents[0] || '');
-    const month = parseInt(dateComponents[1] || '');
-    const year = parseInt(dateComponents[2] || '');
+    // Обработка формата YYYY-MM-DD
+    if (datePart.includes('-')) {
+      const parts = datePart.split('-');
+      if (parts.length !== 3) return inputDate;
 
-    if (isNaN(day) || isNaN(month) || isNaN(year)) {
-      return inputDate; // Не удалось преобразовать в числа
+      const [y, m, d] = parts.map(Number);
+      if (isNaN(y) || isNaN(m) || isNaN(d)) return inputDate;
+
+      year = y;
+      month = m;
+      day = d;
+    }
+    // Обработка формата DD.MM.YYYY
+    else if (datePart.includes('.')) {
+      const parts = datePart.split('.');
+      if (parts.length !== 3) return inputDate;
+
+      const [d, m, y] = parts.map(Number);
+      if (isNaN(d) || isNaN(m) || isNaN(y)) return inputDate;
+
+      year = y;
+      month = m;
+      day = d;
+    }
+    else {
+      return inputDate;
     }
 
-    const date = new Date(year, month - 1, day);
-    if (isNaN(date.getTime())) {
-      return inputDate; // Некорректная дата
-    }
+    // Дальнейшая обработка даты...
+    const messageDate = new Date(year, month - 1, day);
+    if (isNaN(messageDate.getTime())) return inputDate;
 
     const now = new Date();
-    const isCurrentYear = date.getFullYear() === now.getFullYear();
+    const isToday = messageDate.getDate() === now.getDate() &&
+      messageDate.getMonth() === now.getMonth() &&
+      messageDate.getFullYear() === now.getFullYear();
 
-    const monthNames = [
-      'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-      'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
-    ];
-
-    const monthNamesNominative = [
-      'январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
-      'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'
-    ];
-
-    const monthIndex = date.getMonth();
-    if (monthIndex < 0 || monthIndex > 11) {
-      return inputDate; // Некорректный месяц
+    if (isToday) {
+      const [hours, minutes] = timePart.split(':');
+      return hours && minutes ? `${hours}:${minutes}` : inputDate;
     }
 
-    return isCurrentYear
-      ? `${day} ${monthNames[monthIndex]}`
-      : `${monthNamesNominative[monthIndex]} ${year}`;
+    const formattedDay = day.toString().padStart(2, '0');
+    const formattedMonth = month.toString().padStart(2, '0');
+    const shortYear = year.toString().slice(-2);
+
+    return `${formattedDay}.${formattedMonth}.${shortYear}`;
   } catch (e) {
     console.error('Error formatting date:', e);
     return inputDate;
   }
-}
+};
