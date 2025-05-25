@@ -11,7 +11,7 @@ defineProps<{chats: ChatMessage[]}>()
       :key="index"
       clickable
       v-ripple
-      :to="`/chat/${message.dialog_id}`"
+      :to="message.last_message ? `/chat/${message.dialog_id}` : undefined"
 
     >
       <q-item-section top avatar>

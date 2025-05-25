@@ -1,0 +1,113 @@
+
+/* Анимации */
+.message-enter-active,
+.message-leave-active {
+  transition: all 0.3s ease;
+}
+
+.message-enter-from,
+.message-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* Анимация для исходящих сообщений */
+.outgoing.message-enter-from {
+  transform: translateX(20px);
+}
+
+/* Анимация для входящих сообщений */
+.incoming.message-enter-from {
+  transform: translateX(-20px);
+}
+
+/* Остальные стили остаются без изменений */
+.q-item__label {
+  word-break: break-word;
+}
+
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-messages {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: calc(100vh - 50px);
+  padding: 10px 10px 20px 10px; /* Увеличиваем нижний паддинг */
+  overflow-x: hidden;
+
+  /* Для мобильных устройств */
+  @media (max-width: 600px) {
+    max-height: calc(var(--vh, 1vh) * 100 - 100px);
+  }
+}
+
+.message-bubble {
+  max-width: 75%;
+  border-radius: 25px 25px 3px 25px;
+  position: relative;
+  transition: transform 0.2s ease;
+  &.incoming {
+    border-radius: 25px 25px 25px 3px;
+    .message-meta {
+      color: #a9a9a9;
+    }
+    .message-content {
+      padding-right: 50px;
+      &.long {
+        padding-right: 60px;
+      }
+    }
+    .message-meta {
+      right: 10px;
+    }
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .message-content {
+    word-break: break-word;
+    padding: 7px 65px 7px 12px;
+    &.long {
+      padding: 7px 78px 7px 12px;
+    }
+
+  }
+
+  .message-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.7;
+    font-weight: 300;
+    font-size: 11px;
+  }
+}
+
+.outgoing {
+  align-self: flex-end;
+  background: $primary;
+  color: white;
+  .message-meta {
+    color: #d9d9d9;
+  }
+}
+
+.message-meta {
+  position: absolute;
+  justify-content: flex-end;
+  right: 7px;
+  bottom: 4px;
+}
+.incoming {
+  align-self: flex-start;
+  background: $grey-4;
+  color: $dark;
+}

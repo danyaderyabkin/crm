@@ -107,7 +107,7 @@ watch(() => store.refreshTasks, async () => {
         <q-toolbar-title class="text-center text-h6 absolute-center">
           Чат
         </q-toolbar-title>
-        <q-btn  unelevated no-caps size="md" class="text-primary absolute-right" icon="add"></q-btn>
+        <q-btn rounded  unelevated no-caps size="md" class="text-primary absolute-right" icon="add"></q-btn>
       </q-toolbar>
     <q-toolbar v-else-if="route.fullPath === '/settings'">
         <q-toolbar-title class="text-center text-h6 absolute-center">

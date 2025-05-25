@@ -1,5 +1,6 @@
 // app global css in SCSS form
 @import "fonts";
+@import "chat";
 * {
   font-family: 'Mulish', sans-serif;
 }
@@ -111,6 +112,18 @@ a {
   top: 50%;
   transform: translateX(50%) translateY(-58%);
   font-size: 9px;
+}
+
+.chat--name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: initial;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-width: 55%;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .noty {

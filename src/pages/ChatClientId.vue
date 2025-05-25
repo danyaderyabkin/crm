@@ -6,7 +6,7 @@ import { api } from 'boot/axios';
 import { useProjectsStore } from 'stores/projects-store';
 import { pusher } from 'src/utils/pusher';
 import { QSpinnerGears } from 'quasar';
-import type { IUser } from 'src/types/dictionary';
+import type { IClient } from 'src/types/dictionary';
 import type { Message } from 'src/types/chat';
 import ChatMessage from 'components/chat/ChatMessage.vue';
 import ChatHeader from 'components/chat/ChatHeader.vue';
@@ -107,7 +107,7 @@ const setVh = () => {
 };
 
 const currentUserName = computed(() => {
-  return store.dictionary?.users.find((user: IUser) => user.id === currentUserTo.value);
+  return store.dictionary?.clients.find((client: IClient) => client.id === currentUserId.value);
 });
 
 const currentUserTo = computed(() => {
@@ -121,13 +121,14 @@ const currentUserTo = computed(() => {
 onMounted(async () => {
   setVh();
   window.addEventListener('resize', setVh);
-  currentUserId.value = store.dictionary?.user.id ?? null;
-  await fetchMessages(4);
+  currentUserId.value = Number(route.query.client);
+  await fetchMessages(2);
   scrollToBottom();
 
   if (currentUserId.value) {
     setupPusher();
   }
+  console.log(messages.value);
 });
 
 onBeforeUnmount(() => {
@@ -139,7 +140,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <ChatHeader v-if="currentUserName?.full_name" :name="currentUserName?.full_name" />
+  {{currentUserTo}}
+  <ChatHeader :name="currentUserName?.full_name" />
 
   <q-inner-loading :showing="loadingMessages">
     <q-spinner-gears size="50px" color="primary" />
@@ -157,7 +159,7 @@ onBeforeUnmount(() => {
     @send="sendMessage('4')"
     @focus="scrollToBottom(true)"
     @blur="scrollToBottom(true)"
-    :file="false"
+    :file="true"
     :loading="sendingMessage"
     :reset="resetInput"
   />

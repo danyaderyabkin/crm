@@ -11,7 +11,7 @@ defineProps<{chats: ChatMessageClient[]}>()
       :key="index"
       clickable
       v-ripple
-      :to="`/clientChat/${message.dialog_id}`"
+      :to="`/clientChat/${message.id}?client=${message.client_id}`"
 
     >
 
@@ -26,7 +26,7 @@ defineProps<{chats: ChatMessageClient[]}>()
       <q-item-section>
         <q-item-label>{{ message.client.full_name || 'Без названия' }}</q-item-label>
         <q-item-label caption lines="1">
-          {{ message.lastMessage || 'Нет сообщений' }}
+          {{ message.lastMessage || 'Вложение' }}
         </q-item-label>
       </q-item-section>
 

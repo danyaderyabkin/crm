@@ -15,13 +15,22 @@ export interface ChatMessageProj {
   totalNew: number;
 }
 
+export interface Message {
+  id: number
+  from_user_id: number
+  to_user_id: number
+  message: string
+  attachment: string | null
+  created_at: string
+  is_readed: boolean
+}
 export interface ChatMessageClient {
   id: number;
   photo: string;
   lastMessage: string;
   lastMessageAt: string;
   totalNew: number;
-  dialog_id: number;
+  client_id: number;
   client: {
     id: number;
     photo: string;
