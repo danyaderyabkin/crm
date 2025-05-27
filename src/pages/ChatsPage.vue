@@ -54,7 +54,6 @@ const loadChatData = async () => {
     }
 
     const response: ChatData = await chatStore.fetchChat(hash);
-    console.log(response);
 
     // Обновляем данные чатов
     chats.value = {

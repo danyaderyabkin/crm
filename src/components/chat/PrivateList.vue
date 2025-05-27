@@ -1,7 +1,20 @@
 <script setup lang="ts">
 import {formatDate} from "src/utils/chatDateFormatter";
 import type {ChatMessage} from 'src/types/chat';
-defineProps<{chats: ChatMessage[]}>()
+import GlobalChat from "components/chat/GlobalChat.vue";
+import {onMounted} from "vue";
+import {useProjectsStore} from "stores/projects-store";
+const props = defineProps<{chats: ChatMessage[]}>()
+const store = useProjectsStore();
+const getUserName = (id: number) => {
+  return store.dictionary?.users?.find((user) => user.id === id);
+};
+
+onMounted(() => {
+  if (props.chats) {
+    console.log(props.chats);
+  }
+})
 </script>
 
 <template>
@@ -14,9 +27,9 @@ defineProps<{chats: ChatMessage[]}>()
       :to="message.last_message ? `/chat/${message.dialog_id}` : undefined"
 
     >
-      <q-item-section top avatar>
-        <q-avatar rounded>
-          <img src="https://cdn.quasar.dev/img/boy-avatar.png" alt="avatar">
+      <q-item-section class="q-pa-none" top avatar>
+        <q-avatar size="xl" round>
+          <img :src="getUserName(message.userId)?.photo || '../../src/assets/images/noph.jpg'" alt="avatar" />
         </q-avatar>
       </q-item-section>
 
@@ -41,6 +54,7 @@ defineProps<{chats: ChatMessage[]}>()
         </q-badge>
       </q-item-section>
     </q-item>
+    <GlobalChat v-if="chats.length" />
   </q-list>
 </template>
 

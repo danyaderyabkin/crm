@@ -17,10 +17,12 @@ export interface ChatMessageProj {
 
 export interface Message {
   id: number
-  from_user_id: number
+  from_user_id?: number
+  message_from?: number
   to_user_id: number
-  message: string
-  attachment: string | null
+  message?: string
+  message_text?: string
+  attachment: File | null
   created_at: string
   is_readed: boolean
 }
