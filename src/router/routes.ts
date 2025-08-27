@@ -29,9 +29,9 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/ChatsPage.vue') }],
   },
   {
-    path: '/globalChat/:dialog_id',
-    component: () => import('layouts/CabinetLayout.vue'),
-    children: [{ path: '', component: () => import('pages/ChatPageId.vue') }],
+    path: '/globalChat',
+    component: () => import('layouts/ChatLayout.vue'),
+    children: [{ path: '', component: () => import('pages/ChatGlobalId.vue') }],
   },
   {
     path: '/settings',

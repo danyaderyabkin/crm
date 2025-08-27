@@ -26,7 +26,7 @@ const getLastMessage = computed(() => {
     <q-item
       clickable
       v-ripple
-      to="/chat/3"
+      to="/globalChat"
     >
       <q-item-section class="q-pa-none" top avatar>
         <q-avatar size="xl" rounded>

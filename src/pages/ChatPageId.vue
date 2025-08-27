@@ -13,7 +13,6 @@ import ChatHeader from 'components/chat/ChatHeader.vue';
 import ChatFooter from 'components/chat/ChatFooter.vue';
 import { useChatMessages } from 'src/composables/useChatMessages';
 import { useScrollToBottom } from 'src/composables/useScrollToBottom';
-import GlobalChatMessage from "components/chat/GlobalChatMessage.vue"; // Импортируем новый composable
 
 const sendingMessage = ref(false);
 const replyMessage = ref<Message | null>(null);
@@ -232,29 +231,16 @@ onBeforeUnmount(() => {
     <q-spinner-gears size="50px" color="primary" />
   </q-inner-loading>
 
-  <div v-if="Number(route.params.dialog_id) !== 3" ref="messagesContainer" class="chat-messages">
+  <div ref="messagesContainer" class="chat-messages">
       <ChatMessage v-for="msg in messages"
                    @reply="reply"
-                   @load-image="scrollToBottom(true)"
+                   @load-image="scrollToBottom(false)"
                    :message="msg"
                    :user-id="Number(currentUserId)"
                    :key="msg.id"/>
       <div v-if="error" class="text-grey text-center q-mt-md">
         Нет сообщений
       </div>
-  </div>
-  <div v-else ref="messagesContainer" class="chat-messages">
-      <GlobalChatMessage v-for="(msg, index) in messages"
-                         @reply="reply"
-                         @load-image="scrollToBottom(true)"
-                         :message="msg"
-                         :user-id="Number(currentUserId)"
-                         :previous-message="messages[index - 1]"
-                         :next-message="messages[index + 1]"
-                         :key="msg.id"/>
-    <div v-if="error" class="text-grey text-center q-mt-md">
-      Нет сообщений
-    </div>
   </div>
   <ChatFooter
     v-model="newMessage"

@@ -89,13 +89,15 @@ const copyMessage = async () => {
     $q.notify({
       message: 'Сообщение скопировано',
       color: 'grey-13',
-      position: 'top'
+      position: 'top',
+      timeout: 1000
     });
   } catch  {
     $q.notify({
       message: 'Не удалось скопировать сообщение',
       color: 'negative',
-      position: 'top'
+      position: 'top',
+      timeout: 1000
     });
   }
   closeMenu();
@@ -203,7 +205,8 @@ onBeforeUnmount(() => {
 
 .attachment-image {
   max-width: 100%;
-  max-height: 70vh;
+  height: 40vh;
+  max-height: 50vh;
   display: block;
   border-radius: 8px 8px 8px 3px;
   object-fit: contain;

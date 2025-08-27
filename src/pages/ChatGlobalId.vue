@@ -3,19 +3,22 @@ import { onMounted, ref, onBeforeUnmount, computed } from 'vue';
 import { LocalStorage } from 'quasar';
 import { useRoute } from 'vue-router';
 import { api } from 'boot/axios';
-// import { useProjectsStore } from 'stores/projects-store';
+import { useProjectsStore } from 'stores/projects-store';
 import { pusher } from 'src/utils/pusher';
 import { QSpinnerGears } from 'quasar';
+import type { IUser } from 'src/types/dictionary';
 import type { Message } from 'src/types/chat';
+import ChatHeader from 'components/chat/ChatHeader.vue';
 import ChatFooter from 'components/chat/ChatFooter.vue';
 import { useChatMessages } from 'src/composables/useChatMessages';
 import { useScrollToBottom } from 'src/composables/useScrollToBottom';
 import GlobalChatMessage from "components/chat/GlobalChatMessage.vue"; // Импортируем новый composable
 
 const sendingMessage = ref(false);
+const replyMessage = ref<Message | null>(null);
 const resetInput = ref(false);
 const currentUserId = ref<number | null>(null);
-// const store = useProjectsStore();
+const store = useProjectsStore();
 const route = useRoute();
 const newMessage = ref('');
 let channel = null;
@@ -26,36 +29,53 @@ const { messages, loading: loadingMessages, error, fetchMessages } = useChatMess
 // Используем композабл для скролла
 const { messagesContainer, scrollToBottom } = useScrollToBottom();
 
-const sendMessage = async (type:string) => {
-  if (!newMessage.value.trim() || sendingMessage.value) return;
+const sendMessage = async (payload: { type?: number; file?: File | null; text?: string }) => {
+  if ((!newMessage.value.trim()) || sendingMessage.value) return;
 
   try {
     sendingMessage.value = true;
 
-    const tempMessage: Message = {
-      id: Date.now(),
-      from_user_id: currentUserId.value!,
-      to_user_id: currentUserTo.value!,
-      message: newMessage.value,
-      attachment: null,
-      created_at: `${new Date().getHours()}:${new Date().getMinutes()}`,
-      is_readed: false
-    };
 
+    // Подготавливаем FormData для отправки
     const formData = new FormData();
     formData.append('hash', LocalStorage.getItem('hash') as string);
-    formData.append('chat_id', String(route.params.dialog_id));
-    formData.append('chat_type', type);
-    formData.append('to_user_id', String(currentUserTo.value));
-    formData.append('message', newMessage.value);
+    formData.append('chat_type', String( 3));
 
-    await api.post('/chat/send', formData, {
+    // Добавляем текст сообщения, если есть
+    if (payload.text) {
+      formData.append('message', payload.text);
+    }
+
+    // Добавляем файл, если есть
+    if (payload.file) {
+      formData.append('attachment', payload.file);
+    }
+
+    // Отправляем запрос
+    const data = await api.post('/chat/send', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
+
+    const tempMessage = {
+        id: Date.now(),
+        message_from: currentUserId.value!,
+        message_from_client: '',
+        to_user_id: currentUserTo.value!,
+        message_text: payload.text || '',
+        attachment: data.data.data.attachment,
+        created_at: `${new Date().getHours()}:${new Date().getMinutes()}`,
+        is_readed: false
+      };
+
+    // Обновляем UI
     messages.value = [...messages.value, tempMessage];
+    console.log(messages.value)
     scrollToBottom(true);
     resetInput.value = true;
     setTimeout(() => resetInput.value = false, 100);
+
+    // Очищаем поле ввода
+    newMessage.value = '';
   } catch (error) {
     console.error('Ошибка отправки сообщения:', error);
   } finally {
@@ -71,38 +91,85 @@ const setupPusher = () => {
   const channelName = `user-channel-${currentUserId.value}`;
   channel = pusher.subscribe(channelName);
 
-  channel.bind('NewMessagePrivateChat', (data) => {
-    console.log('New message received:', data);
+  if(Number(route.params.dialog_id) !== 3) {
+    channel.bind('NewMessagePrivateChat', (data) => {
+      console.log('New message received:', data);
 
-    const messageData = data.data || data;
-    const isIncoming = messageData.from_user_id !== currentUserId.value;
+      const messageData = data.data || data;
+      const isIncoming = messageData.from_user_id !== currentUserId.value;
 
-    const newMsg: Message = {
-      id: messageData.id || Date.now(),
-      from_user_id: messageData.from_user_id,
-      to_user_id: messageData.to_user_id || currentUserId.value!,
-      message: messageData.message,
-      attachment: messageData.attachment || null,
-      created_at: messageData.created_at || new Date().toISOString(),
-      is_readed: messageData.is_readed || false
-    };
+      const newMsg: Message = {
+        id: messageData.id || Date.now(),
+        from_user_id: messageData.from_user_id,
+        to_user_id: messageData.to_user_id || currentUserId.value!,
+        message: messageData.message,
+        attachment: messageData.attachment || null,
+        created_at: messageData.created_at || new Date().toISOString(),
+        is_readed: messageData.is_readed || false
+      };
 
-    if (isIncoming) {
-      messages.value = messages.value.map(msg => ({
-        ...msg,
-        is_readed: true
-      }));
-    }
+      if (isIncoming) {
+        messages.value = messages.value.map(msg => ({
+          ...msg,
+          is_readed: true
+        }));
+      }
 
-    messages.value = [...messages.value, newMsg];
-    scrollToBottom(true);
-  });
+      messages.value = [...messages.value, newMsg];
+      scrollToBottom(true);
+    });
+  } else {
+    channel.bind('NewMessageGlobalChat', (data) => {
+      console.log('New message received:', data);
+
+      const messageData = data.data || data;
+      const isIncoming = messageData.from_user_id !== currentUserId.value;
+
+      const newMsg = {
+        id: messageData.id || Date.now(),
+        message_from: messageData.message_from,
+        to_user_id: messageData.to_user_id || currentUserId.value!,
+        message_text: messageData.message_text,
+        attachment: messageData.attachment || null,
+        created_at: messageData.created_at || new Date().toISOString(),
+        is_readed: messageData.is_readed || false
+      };
+
+      if (isIncoming) {
+        messages.value = messages.value.map(msg => ({
+          ...msg,
+          is_readed: true
+        }));
+      }
+
+      messages.value = [...messages.value, newMsg];
+      scrollToBottom(true);
+      console.log(messages.value);
+    });
+  }
 };
 
 const setVh = () => {
   const vh = window.innerHeight * 0.01;
   document.documentElement.style.setProperty('--vh', `${vh}px`);
 };
+
+const currentUserName = computed(() => {
+  return store.dictionary?.users.find((user: IUser) => user.id === currentUserTo.value);
+});
+
+const isGlobalChat = computed(() => {
+  return Number(route.params.dialog_id) === 3;
+});
+
+
+const reply = (msg: Message) => {
+  console.log(msg)
+  replyMessage.value = msg;
+}
+const cancelReplay = () => {
+  replyMessage.value = null;
+}
 
 
 const currentUserTo = computed(() => {
@@ -116,14 +183,14 @@ const currentUserTo = computed(() => {
 onMounted(async () => {
   setVh();
   window.addEventListener('resize', setVh);
-  currentUserId.value = Number(route.params.dialog_id);
-  await fetchMessages(3);
+  currentUserId.value = store.dictionary?.user.id ?? null;
+  const typeChat = ref(3)
+  await fetchMessages(typeChat.value);
   scrollToBottom();
 
   if (currentUserId.value) {
     setupPusher();
   }
-  console.log(messages.value);
 });
 
 onBeforeUnmount(() => {
@@ -135,33 +202,36 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-header elevated>
-    <q-toolbar class="bg-primary text-white">
-      <q-btn class="absolute-left" to="/chat" icon="chevron_left" dense unelevated no-caps>назад</q-btn>
-
-      <p class="q-mx-auto q-mb-none chat--name">Общий чат</p>
-    </q-toolbar>
-  </q-header>
+  <ChatHeader v-if="currentUserName?.full_name" :id="Number(currentUserTo)" :name="`Чат с ${currentUserName?.full_name}`" />
+  <ChatHeader v-else name="Общий чат" />
 
   <q-inner-loading :showing="loadingMessages">
     <q-spinner-gears size="50px" color="primary" />
   </q-inner-loading>
 
   <div ref="messagesContainer" class="chat-messages">
-    <GlobalChatMessage v-for="msg in messages" :message="msg" :user-id="currentUserId" :key="msg.id" />
+    <GlobalChatMessage v-for="(msg, index) in messages"
+                       @reply="reply"
+                       @load-image="scrollToBottom(false)"
+                       :message="msg"
+                       :user-id="Number(currentUserId)"
+                       :next-message="messages[index + 1]"
+                       :key="msg.id"/>
     <div v-if="error" class="text-grey text-center q-mt-md">
       Нет сообщений
     </div>
   </div>
-
   <ChatFooter
     v-model="newMessage"
-    @send="sendMessage('3')"
+    @send="sendMessage"
     @focus="scrollToBottom(true)"
     @blur="scrollToBottom(true)"
     :file="true"
     :loading="sendingMessage"
     :reset="resetInput"
+    :global="isGlobalChat"
+    :reply-to="replyMessage"
+    @cancel-reply="cancelReplay"
   />
 </template>
 

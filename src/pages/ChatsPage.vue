@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { LocalStorage } from "quasar";
 import { useChatStore } from "stores/chat";
 import type { ChatData } from 'src/types/chat';
@@ -17,10 +17,11 @@ const chats = ref<ChatData>({
   privateChats: [],
   allChats: [],
   clientChats: [],
-  projectChats: []
+  projectChats: [],
+  globalChat: {totalNew: 0}
 });
 
-const activeTab = ref<ChatTab>('private');
+const activeTab = ref<ChatTab>((LocalStorage.getItem('activeChatTab') as ChatTab) || 'private');
 const loading = ref<boolean>(false);
 
 // Маппинг табов для отображения
@@ -61,7 +62,7 @@ const loadChatData = async () => {
       allChats: response.allChats || [],
       clientChats: response.clientChats || [],
       projectChats: response.projectChats || [],
-      globalChat: response.globalChat || []
+      globalChat: response.globalChat || {totalNew: 0}
     };
   } catch (error) {
     console.error('Error loading chat data:', error);
@@ -71,7 +72,7 @@ const loadChatData = async () => {
       allChats: [],
       clientChats: [],
       projectChats: [],
-      globalChat:  []
+      globalChat:  {totalNew: 0},
     };
   } finally {
     loading.value = false;
@@ -80,6 +81,11 @@ const loadChatData = async () => {
 
 onMounted(async () => {
   await loadChatData();
+});
+
+// Следим за изменениями активного таба и сохраняем в LocalStorage
+watch(activeTab, (newTab) => {
+  LocalStorage.set('activeChatTab', newTab);
 });
 </script>
 
@@ -103,8 +109,7 @@ onMounted(async () => {
         :label="tab.label"
       />
     </q-tabs>
-<!--<pre>{{currentChats}}</pre>-->
-    <PrivateList :chats="currentChats" :global-new="chats?.globalChat?.totalNew" v-if="activeTab === 'private'"/>
+    <PrivateList :chats="currentChats" :global-new="chats.globalChat.totalNew" v-if="activeTab === 'private'"/>
     <ClientList :chats="currentChats" v-else-if="activeTab === 'client'"/>
     <ProjList :chats="currentChats" v-else-if="activeTab === 'proj'"/>
 

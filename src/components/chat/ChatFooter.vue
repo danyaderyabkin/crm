@@ -38,19 +38,6 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const selectedFile = ref<File | null>(null);
 const filePreviewUrl = ref<string | null>(null);
 
-// Следим за изменениями
-watch(() => props.reset, (newVal) => {
-  if (newVal) {
-    newMessage.value = '';
-    emit('update:modelValue', '');
-    clearFile();
-  }
-});
-
-watch(() => props.replyTo, () => {
-  const input = document.querySelector('.chat-input') as HTMLInputElement;
-  input?.focus();
-});
 
 // Очистка файла
 const clearFile = () => {
@@ -70,7 +57,6 @@ const onInput = (value: string) => {
     emit('update:modelValue', value);
   }
 };
-
 
 
 // Функционал файлов
@@ -141,12 +127,24 @@ const onSend = () => {
     emit('update:modelValue', '');
   }
 };
+
+// Следим за изменениями
+watch(() => props.reset, (newVal) => {
+  if (newVal) {
+    newMessage.value = '';
+    emit('update:modelValue', '');
+    clearFile();
+  }
+});
+
+watch(() => props.replyTo, () => {
+  const input = document.querySelector('.chat-input') as HTMLInputElement;
+  input?.focus();
+});
 </script>
 
 <template>
   <q-footer class="bg-grey-2">
-    {{global}}
-
     <!-- Блок предпросмотра ответа -->
     <div v-if="replyTo" class="reply-preview bg-blue-1 q-px-md q-pt-xs q-pb-none">
       <div class="row items-center">

@@ -8,7 +8,6 @@ const store = useProjectsStore();
 const props = defineProps<{
   message: Message;
   userId: number;
-  previousMessage: Message;
   nextMessage?: Message; // Добавляем пропс для следующего сообщения
 }>();
 
@@ -40,11 +39,7 @@ const shouldShowAvatar = computed(() => {
 });
 
 // Показываем имя, если это первое сообщение от пользователя в цепочке
-const shouldShowUserName = computed(() => {
-  if (isOutgoing(props.message)) return false;
-  if (!props.previousMessage) return true;
-  return props.previousMessage.message_from !== props.message.message_from;
-});
+const shouldShowUserName = computed(() => !isOutgoing(props.message));
 </script>
 
 <template>

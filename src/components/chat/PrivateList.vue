@@ -2,19 +2,13 @@
 import {formatDate} from "src/utils/chatDateFormatter";
 import type {ChatMessage} from 'src/types/chat';
 import GlobalChat from "components/chat/GlobalChat.vue";
-import {onMounted} from "vue";
 import {useProjectsStore} from "stores/projects-store";
-const props = defineProps<{chats: ChatMessage[];globalNew: number}>()
+defineProps<{chats: ChatMessage[];globalNew: number}>()
 const store = useProjectsStore();
 const getUserName = (id: number) => {
   return store.dictionary?.users?.find((user) => user.id === id);
 };
 
-onMounted(() => {
-  if (props.chats) {
-    console.log(props.chats);
-  }
-})
 </script>
 
 <template>

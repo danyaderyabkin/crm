@@ -4,6 +4,11 @@ export interface ChatMessage {
   last_message_at: string;
   total_new_messages: number;
   dialog_id: number;
+  userId: number;
+}
+
+export interface ChatMessageGlobal {
+  totalNew: number;
 }
 
 export interface ChatMessageProj {
@@ -18,13 +23,14 @@ export interface ChatMessageProj {
 export interface Message {
   id: number
   from_user_id?: number
-  message_from?: number
+  message_from: number
   to_user_id: number
   message?: string
   message_text?: string
   attachment: File | null
   created_at: string
   is_readed: boolean
+  message_from_client: string
 }
 export interface ChatMessageClient {
   id: number;
@@ -44,7 +50,7 @@ export interface ChatData {
   privateChats?: ChatMessage[] | undefined;
   allChats?: ChatMessage[] | undefined;
   clientChats?: ChatMessageClient[] | undefined;
-  globalChat?: ChatMessage[] | undefined;
+  globalChat: ChatMessageGlobal;
   projectChats?: ChatMessageProj[] | undefined;
   // [key: string]: ChatMessage[] | ChatMessageClient[] | ChatMessageProj[] | undefined; // Если нужен динамический доступ
 }

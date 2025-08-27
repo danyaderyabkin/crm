@@ -16,7 +16,7 @@ export function useChatMessages() {
       loading.value = true;
       error.value = '';
       const hash: string | null = LocalStorage.getItem('hash');
-      const dialogId: number = Number(route.params.dialog_id);
+      const dialogId: number = Number(route.params.dialog_id) || 3;
 
       if (!hash) throw new Error('Hash not found in LocalStorage');
 
