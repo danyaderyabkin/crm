@@ -12,7 +12,13 @@ const props = defineProps<{
   userId: number
 }>();
 
-const isOutgoing = (msg: Message) => msg.from_user_id === props.userId;
+const isOutgoing = (msg: Message) => {
+  if (msg.from_user_id) {
+    return msg.from_user_id === props.userId
+  } else {
+    return !msg.message_from_client;
+  }
+};
 const menuPosition = ref({ x: 0, y: 0 });
 const showContextMenu = ref(false);
 
@@ -112,7 +118,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    :class="['message-bubble', isOutgoing(message) ? 'outgoing' : 'incoming', hasImageAttachment ? 'image' : '',parsedMessage.hasQuote ? 'reply' : '' ]"
+    :class="['message-bubble', isOutgoing(message) ? 'outgoing' : 'incoming', hasImageAttachment ? 'image' : '', parsedMessage.hasQuote ? 'reply' : '' ]"
     @touchstart="handleTouchStart"
     @touchend="handleTouchEnd"
     @touchcancel="handleTouchEnd"
@@ -215,7 +221,7 @@ onBeforeUnmount(() => {
 
 .quote-container {
   display: flex;
-  padding: 6px;
+  padding: 8px;
   background-color: rgba(0, 0, 0, 0.05);
   border-radius: 10px 10px 0 0;
   position: relative;

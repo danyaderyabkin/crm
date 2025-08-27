@@ -10,6 +10,7 @@ const props = defineProps<{
   replyTo?: {
     id: number;
     message: string;
+    message_text?: string;
     author?: string;
     attachment?: string | null;
   } | null;
@@ -70,25 +71,7 @@ const onInput = (value: string) => {
   }
 };
 
-const onSend = () => {
-  if (newMessage.value.trim() || selectedFile.value) {
-    // Создаем объект с данными для отправки
-    const payload = {
-      type: props.global ? 3 : 4,
-      file: selectedFile.value || null,
-      text: props.replyTo ? `[quote]${props?.replyTo?.message}[/quote]${newMessage.value.trim()}` : newMessage.value.trim()
-    };
 
-    // Отправляем данные в родительский компонент
-    emit('send', payload);
-
-    // Сбрасываем состояние
-    emit('cancel-reply');
-    clearFile();
-    newMessage.value = '';
-    emit('update:modelValue', '');
-  }
-};
 
 // Функционал файлов
 const triggerFileInput = () => {
@@ -133,15 +116,37 @@ const replyPreview = computed(() => {
     return withoutQuotes || text.slice(0, 50) + (text.length > 50 ? '...' : '');
   };
 
-  const processedText = processText(props.replyTo.message || '');
+  const processedText = processText(props.replyTo.message || props.replyTo.message_text || '');
   return props.replyTo.attachment
     ? `📎 ${processedText || 'Вложение'}`
     : processedText;
 });
+
+const onSend = () => {
+  if (newMessage.value.trim()) {
+    // Создаем объект с данными для отправки
+    const payload = {
+      type: props.global ? 3 : 4,
+      file: selectedFile.value || null,
+      text: props.replyTo ? `[quote]${replyPreview.value}[/quote]${newMessage.value.trim()}` : newMessage.value.trim()
+    };
+
+    // Отправляем данные в родительский компонент
+    emit('send', payload);
+
+    // Сбрасываем состояние
+    emit('cancel-reply');
+    clearFile();
+    newMessage.value = '';
+    emit('update:modelValue', '');
+  }
+};
 </script>
 
 <template>
   <q-footer class="bg-grey-2">
+    {{global}}
+
     <!-- Блок предпросмотра ответа -->
     <div v-if="replyTo" class="reply-preview bg-blue-1 q-px-md q-pt-xs q-pb-none">
       <div class="row items-center">
@@ -214,7 +219,7 @@ const replyPreview = computed(() => {
           <q-icon
             name="send"
             @click="onSend"
-            :class="{ 'text-primary': newMessage.trim() }"
+            :class="{ 'text-primary': newMessage.trim(), 'pointer-event-none':  !newMessage.trim()}"
           />
         </template>
       </q-input>

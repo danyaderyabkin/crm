@@ -60,7 +60,8 @@ const loadChatData = async () => {
       privateChats: response.privateChats || [],
       allChats: response.allChats || [],
       clientChats: response.clientChats || [],
-      projectChats: response.projectChats || []
+      projectChats: response.projectChats || [],
+      globalChat: response.globalChat || []
     };
   } catch (error) {
     console.error('Error loading chat data:', error);
@@ -69,7 +70,8 @@ const loadChatData = async () => {
       privateChats: [],
       allChats: [],
       clientChats: [],
-      projectChats: []
+      projectChats: [],
+      globalChat:  []
     };
   } finally {
     loading.value = false;
@@ -84,7 +86,6 @@ onMounted(async () => {
 <template>
   <div>
     <q-inner-loading label="Загрузка..." :showing="loading" />
-
     <q-tabs
       narrow-indicator
       dense
@@ -103,7 +104,7 @@ onMounted(async () => {
       />
     </q-tabs>
 <!--<pre>{{currentChats}}</pre>-->
-    <PrivateList :chats="currentChats" v-if="activeTab === 'private'"/>
+    <PrivateList :chats="currentChats" :global-new="chats?.globalChat?.totalNew" v-if="activeTab === 'private'"/>
     <ClientList :chats="currentChats" v-else-if="activeTab === 'client'"/>
     <ProjList :chats="currentChats" v-else-if="activeTab === 'proj'"/>
 

@@ -181,6 +181,7 @@ const isGlobalChat = computed(() => {
 
 
 const reply = (msg: Message) => {
+  console.log(msg)
   replyMessage.value = msg;
 }
 const cancelReplay = () => {
@@ -232,13 +233,25 @@ onBeforeUnmount(() => {
   </q-inner-loading>
 
   <div v-if="Number(route.params.dialog_id) !== 3" ref="messagesContainer" class="chat-messages">
-      <ChatMessage v-for="msg in messages" @reply="reply" @load-image="scrollToBottom(true)" :message="msg" :user-id="Number(currentUserId)" :key="msg.id"/>
+      <ChatMessage v-for="msg in messages"
+                   @reply="reply"
+                   @load-image="scrollToBottom(true)"
+                   :message="msg"
+                   :user-id="Number(currentUserId)"
+                   :key="msg.id"/>
       <div v-if="error" class="text-grey text-center q-mt-md">
         Нет сообщений
       </div>
   </div>
   <div v-else ref="messagesContainer" class="chat-messages">
-      <GlobalChatMessage v-for="(msg, index) in messages" :message="msg" :user-id="Number(currentUserId)" :previous-message="messages[index - 1]" :key="msg.id"/>
+      <GlobalChatMessage v-for="(msg, index) in messages"
+                         @reply="reply"
+                         @load-image="scrollToBottom(true)"
+                         :message="msg"
+                         :user-id="Number(currentUserId)"
+                         :previous-message="messages[index - 1]"
+                         :next-message="messages[index + 1]"
+                         :key="msg.id"/>
     <div v-if="error" class="text-grey text-center q-mt-md">
       Нет сообщений
     </div>

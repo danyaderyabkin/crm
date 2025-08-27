@@ -4,7 +4,7 @@ import type {ChatMessage} from 'src/types/chat';
 import GlobalChat from "components/chat/GlobalChat.vue";
 import {onMounted} from "vue";
 import {useProjectsStore} from "stores/projects-store";
-const props = defineProps<{chats: ChatMessage[]}>()
+const props = defineProps<{chats: ChatMessage[];globalNew: number}>()
 const store = useProjectsStore();
 const getUserName = (id: number) => {
   return store.dictionary?.users?.find((user) => user.id === id);
@@ -54,7 +54,7 @@ onMounted(() => {
         </q-badge>
       </q-item-section>
     </q-item>
-    <GlobalChat v-if="chats.length" />
+    <GlobalChat :count="globalNew" v-if="chats.length" />
   </q-list>
 </template>
 

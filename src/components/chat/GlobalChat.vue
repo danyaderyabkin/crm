@@ -6,6 +6,8 @@ import {useChatMessages} from "src/composables/useChatMessages";
 import {onMounted, ref, computed} from "vue";
 import type {Message} from "src/types/chat";
 
+defineProps<{count: number}>();
+
 const getChat = useChatMessages()
 const globalChatMessages = ref<Message[]>([])
 
@@ -44,11 +46,12 @@ const getLastMessage = computed(() => {
 
         </q-item-label>
         <q-badge
+          v-if="count"
           class="q-mt-auto q-px-none"
           color="primary"
           rounded
         >
-          1
+          {{count}}
         </q-badge>
       </q-item-section>
     </q-item>

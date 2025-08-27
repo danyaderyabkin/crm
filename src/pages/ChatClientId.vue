@@ -20,6 +20,7 @@ const currentUserId = ref<number | null>(null);
 const store = useProjectsStore();
 const route = useRoute();
 const newMessage = ref('');
+const replyMessage = ref<Message | null>(null);
 let channel = null;
 
 // Используем композабл для сообщений
@@ -73,7 +74,7 @@ const setupPusher = () => {
   const channelName = `user-channel-${currentUserId.value}`;
   channel = pusher.subscribe(channelName);
 
-  channel.bind('NewMessagePrivateChat', (data) => {
+  channel.bind('NewMessageClientChat', (data) => {
     console.log('New message received:', data);
 
     const messageData = data.data || data;
@@ -118,6 +119,15 @@ const currentUserTo = computed(() => {
   }
 })
 
+const reply = (msg: Message) => {
+  replyMessage.value = msg;
+}
+
+const cancelReplay = () => {
+  replyMessage.value = null;
+}
+
+
 onMounted(async () => {
   setVh();
   window.addEventListener('resize', setVh);
@@ -128,7 +138,6 @@ onMounted(async () => {
   if (currentUserId.value) {
     setupPusher();
   }
-  console.log(messages.value);
 });
 
 onBeforeUnmount(() => {
@@ -140,7 +149,6 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  {{currentUserTo}}
   <ChatHeader :name="currentUserName?.full_name" />
 
   <q-inner-loading :showing="loadingMessages">
@@ -148,7 +156,12 @@ onBeforeUnmount(() => {
   </q-inner-loading>
 
   <div ref="messagesContainer" class="chat-messages">
-    <ChatMessage v-for="msg in messages" :message="msg" :user-id="currentUserId" :key="msg.id" />
+    <ChatMessage v-for="msg in messages.slice(0, 110)"
+                 @reply="reply"
+                 @load-image="scrollToBottom(true)"
+                 :message="msg"
+                 :user-id="Number(currentUserId)"
+                 :key="msg.id"/>
     <div v-if="error" class="text-grey text-center q-mt-md">
       Нет сообщений
     </div>
@@ -156,12 +169,15 @@ onBeforeUnmount(() => {
 
   <ChatFooter
     v-model="newMessage"
-    @send="sendMessage('4')"
+    @send="sendMessage"
     @focus="scrollToBottom(true)"
     @blur="scrollToBottom(true)"
     :file="true"
     :loading="sendingMessage"
     :reset="resetInput"
+    :global="isGlobalChat"
+    :reply-to="replyMessage"
+    @cancel-reply="cancelReplay"
   />
 </template>
 
